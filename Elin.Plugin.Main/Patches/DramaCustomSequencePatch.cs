@@ -37,6 +37,22 @@ namespace Elin.Plugin.Main.Patches
         {
             return DramaCustomSequenceImpl.ChoicePrefix(__instance, lang, idJump, cancel);
         }
+
+        [HarmonyPatch(nameof(DramaCustomSequence.Step), new[] { typeof(string) })]
+        [HarmonyPostfix]
+        public static void StepPostfix(DramaCustomSequence __instance, string step)
+        {
+            DramaCustomSequenceImpl.StepPostfix(__instance, step);
+        }
+
+        // 珍しく private
+        [HarmonyPatch("Talk", new[] { typeof(string), typeof(string) })]
+        [HarmonyPostfix]
+        public static void TalkPostfix(DramaCustomSequence __instance, string idTalk, string idJump)
+        {
+            DramaCustomSequenceImpl.TalkPostfix(__instance, idTalk, idJump);
+        }
+
         #endregion
     }
 }
