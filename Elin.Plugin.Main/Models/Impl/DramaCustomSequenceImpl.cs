@@ -146,14 +146,14 @@ namespace Elin.Plugin.Main.Models.Impl
 
         public static bool ChoicePrefix(DramaCustomSequence instance, string lang, string idJump, bool cancel)
         {
-            var currentCharacter = BuildArgumentCharacter;
-            if (currentCharacter == null)
+            var c = BuildArgumentCharacter;
+            if (c == null)
             {
                 ModHelper.LogNotExpected($"{nameof(BuildArgumentCharacter)} is null");
                 return true;
             }
 
-            ModHelper.LogDev($"ChoicePrefix: lang={lang}, idJump={idJump}, cancel={cancel}, currentCharacter={currentCharacter.Name}");
+            ModHelper.LogDev($"ChoicePrefix: lang={lang}, idJump={idJump}, cancel={cancel}, c={c.Name}");
 
             // 添い寝の選択肢の直前に、移動許可の選択肢を差し込む
             // ここで待機してほしい Choice("disableMove", "_disableMove"); の選択肢と位置を合わせるための無理やり感
@@ -161,13 +161,45 @@ namespace Elin.Plugin.Main.Models.Impl
             {
                 // [ELIN:DramaCustomSequence.Build]
                 // -> if (c.IsPCParty) ... else if (!c.noMove)
-                if (!currentCharacter.IsPCParty)
+                if (!c.IsPCParty)
                 {
-                    if (currentCharacter.noMove)
+                    if (c.noMove)
                     {
                         ModHelper.LogDev("[add] LanguageId.EnableMove, JumpId.HookEnableMove");
                         instance.Choice2(LanguageId.EnableMove, JumpId.HookEnableMove);
                     }
+                }
+            }
+
+            // 選択肢最上部に勧誘メッセージを差し込む
+            // Talk は内部メソッドなので正攻法でパッチあてられず、_Talk の言語は変換済みなのでここで無理やり差し込む
+            if (CurrentOtherSequence == OtherSequence.Prepare)
+            {
+                // 実は… からの選択肢構築の開始時点で実施する
+                // これは 
+                // 1. Step("_factionOther");
+                // 2. Talk("what", StepDefault);
+                // の順序で呼ばれることに完全に依存している
+
+                // [Elin]
+                // -> if (!c.IsPCFaction && c.affinity.CanInvite() && !EClass._zone.IsInstance && c.c_bossType == BossType.none)
+                // if ((c.trait.IsUnique || c.IsGlobal) && c.GetInt(111) == 0 && !c.IsPCFaction) ... else
+                try
+                {
+                    var canInvite =
+                        (!c.IsPCFaction && c.affinity.CanInvite() && !EClass._zone.IsInstance && c.c_bossType == BossType.none)
+                        &&
+                        !((c.trait.IsUnique || c.IsGlobal) && c.GetInt(111) == 0 && !c.IsPCFaction)
+                    ;
+                    if (canInvite)
+                    {
+                        ModHelper.LogDev("[add] LanguageId.InviteHome, JumpId.HookInviteHome");
+                        instance.Choice2(LanguageId.InviteHome, JumpId.HookInviteHome);
+                    }
+                }
+                finally
+                {
+                    CurrentOtherSequence = OtherSequence.None;
                 }
             }
 
@@ -180,37 +212,7 @@ namespace Elin.Plugin.Main.Models.Impl
                 ? OtherSequence.Prepare
                 : OtherSequence.None
             ;
-        }
-
-        public static void TalkPostfix(DramaCustomSequence instance, string idTalk, string idJump)
-        {
-            if (CurrentOtherSequence == OtherSequence.Prepare && idTalk == LanguageId.What)
-            {
-                var currentCharacter = BuildArgumentCharacter;
-                if (currentCharacter == null)
-                {
-                    ModHelper.LogNotExpected($"{nameof(BuildArgumentCharacter)} is null");
-                    return;
-                }
-
-                // 選択肢最上部に勧誘メッセージを差し込む
-                // 実は… から表示される項目は色々条件があるので待機用の適当差し込みだと怪しいので
-                // 実は… からの選択肢構築の開始時点で実施する
-
-                // [Elin]
-                // -> if (!c.IsPCFaction && c.affinity.CanInvite() && !EClass._zone.IsInstance && c.c_bossType == BossType.none)
-                // if ((c.trait.IsUnique || c.IsGlobal) && c.GetInt(111) == 0 && !c.IsPCFaction) ... else
-
-
-                try
-                {
-                    instance.Choice2(LanguageId.InviteHome, JumpId.HookInviteHome);
-                }
-                finally
-                {
-                    CurrentOtherSequence = OtherSequence.None;
-                }
-            }
+            ModHelper.LogDev($"StepPostfix: step={step}, CurrentOtherSequence={CurrentOtherSequence}");
         }
 
 
