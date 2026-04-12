@@ -149,7 +149,12 @@ namespace Elin.Plugin.Main.Models.Impl
             // [ELIN:DramaCustomSequence.Build]
             // -> if (c.IsPCParty && !c.isSummon)
             // -> -> if (c.host == null && c.homeZone != null)
-            return false;
+            var result =
+                (c.IsPCParty && !c.isSummon)
+                &&
+                (c.host == null && c.homeZone != null)
+            ;
+            return result;
         }
 
         #endregion
@@ -214,6 +219,19 @@ namespace Elin.Plugin.Main.Models.Impl
                 return false;
             }
 
+            // ホームで待機しろ、はすでに変換済みの言語が渡されるのでジャンプIDで判断する
+            if (idJump == JumpId.LeaveParty)
+            {
+                ModHelper.LogDev($"[ignore] {lang}, {idJump}");
+                return false;
+            }
+            if (idJump == JumpId.HookLeaveParty)
+            {
+                idJump = JumpId.LeaveParty;
+                ModHelper.LogDev($"[hook] {nameof(idJump)}: {JumpId.HookLeaveParty} -> {idJump}");
+                return true;
+            }
+
             //if (lang == LanguageId.Bye)
             //{
             //    var c = BuildArgumentCharacter;
@@ -274,6 +292,11 @@ namespace Elin.Plugin.Main.Models.Impl
                     {
                         ModHelper.LogDev("[add] LanguageId.JoinParty, JumpId.HookJoinParty");
                         instance.Choice2(LanguageId.JoinParty, JumpId.HookJoinParty);
+                    }
+                    else if (CanLeaveParty(c)) // 特に Elin 側で分けてはい無さそうな気はするが一応 else で条件追加しておく
+                    {
+                        ModHelper.LogDev("[add] LanguageId.LeaveParty, JumpId.HookLeaveParty");
+                        instance.Choice2(LanguageId.LeaveParty.lang(c.homeZone.Name), JumpId.HookLeaveParty);
                     }
                 }
                 finally
