@@ -1,5 +1,7 @@
 using Elin.Plugin.Generated;
 using Elin.Plugin.Main.PluginHelpers;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Elin.Plugin.Main.Models.Impl
 {
@@ -110,6 +112,14 @@ namespace Elin.Plugin.Main.Models.Impl
         private static Chara? BuildArgumentCharacter { get; set; }
         private static OtherSequence CurrentOtherSequence { get; set; } = OtherSequence.None;
 
+        private static IReadOnlyDictionary<string, LanguageHookJumpId> LanguageHookJumpIdMap { get; } = new[]
+        {
+            new LanguageHookJumpId(LanguageId.EnableMove, JumpId.EnableMove, JumpId.HookEnableMove),
+            new LanguageHookJumpId(LanguageId.MakeHome, JumpId.MakeHome, JumpId.HookMakeHome),
+            new LanguageHookJumpId(LanguageId.JoinParty, JumpId.JoinParty, JumpId.HookJoinParty),
+        }.ToDictionary(k => k.Language, v => v)
+        ;
+
         #endregion
 
         #region function
@@ -185,48 +195,19 @@ namespace Elin.Plugin.Main.Models.Impl
             // 特定のセリフを選択肢に表示させないようにしたりジャンプ先加工したり、忙しい子
             ModHelper.LogDev($"Choice2Prefix: lang={lang}, idJump={idJump}");
 
-            if (lang == LanguageId.EnableMove)
+            if (LanguageHookJumpIdMap.TryGetValue(lang, out var languageHookJumpId))
             {
-                // フックした「もう待機する必要はない」が指定されている場合は Elin 側の正式なジャンプIDに差し替え
-                if (idJump == JumpId.HookEnableMove)
+                // フックしたジャンプIDが指定されている場合は Elin 側の正式なジャンプIDに差し替え
+                if (idJump == languageHookJumpId.HookJumpId)
                 {
-                    idJump = JumpId.EnableMove;
-                    ModHelper.LogDev($"[hook] {nameof(idJump)}: {JumpId.HookEnableMove} -> {idJump}");
+                    idJump = languageHookJumpId.OriginJumpId;
+                    ModHelper.LogDev($"[hook] {nameof(idJump)}: {languageHookJumpId.HookJumpId} -> {idJump}");
                     return true;
                 }
 
                 ModHelper.LogDev($"[ignore] {lang}, {idJump}");
                 return false;
             }
-
-            if (lang == LanguageId.JoinParty)
-            {
-                // フックした「仲間に誘う」が指定されている場合は Elin 側の正式なジャンプIDに差し替え
-                if (idJump == JumpId.HookJoinParty)
-                {
-                    idJump = JumpId.JoinParty;
-                    ModHelper.LogDev($"[hook] {nameof(idJump)}: {JumpId.HookJoinParty} -> {idJump}");
-                    return true;
-                }
-
-                ModHelper.LogDev($"[ignore] {lang}, {idJump}");
-                return false;
-            }
-
-            if (lang == LanguageId.MakeHome)
-            {
-                // フックした「この土地に移住して欲しい」が指定されている場合は Elin 側の正式なジャンプIDに差し替え
-                if (idJump == JumpId.HookMakeHome)
-                {
-                    idJump = JumpId.MakeHome;
-                    ModHelper.LogDev($"[hook] {nameof(idJump)}: {JumpId.HookMakeHome} -> {idJump}");
-                    return true;
-                }
-
-                ModHelper.LogDev($"[ignore] {lang}, {idJump}");
-                return false;
-            }
-
 
             // ホームで待機しろ、はすでに変換済みの言語が渡されるのでジャンプIDで判断する
             if (idJump == JumpId.LeaveParty)
