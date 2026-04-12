@@ -127,11 +127,12 @@ namespace Elin.Plugin.Main.Models.Impl
         private static bool CanEnableMove(Chara c)
         {
             // [ELIN:DramaCustomSequence.Build]
-            // -> if (c.IsPCParty) ... else if (!c.noMove)
+            // -> if (c.IsHomeMember())
+            // -> -> if (c.noMove)
             var result =
-                !c.IsPCParty
+                c.IsHomeMember()
                 &&
-                !c.noMove
+                c.noMove
             ;
             return result;
         }
@@ -144,7 +145,7 @@ namespace Elin.Plugin.Main.Models.Impl
             var result =
                 c.IsHomeMember()
                 &&
-                !c.IsPCParty && c.memberType != FactionMemberType.Livestock && c.trait.CanJoinParty
+                (!c.IsPCParty && c.memberType != FactionMemberType.Livestock && c.trait.CanJoinParty)
             ;
             return result;
         }

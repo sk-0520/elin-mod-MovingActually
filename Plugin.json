@@ -7,15 +7,32 @@
     "loadPriority": 100,
     "elinVersion": "0.23.295",
     "description": [
-      "説明1行目",
-      "説明2行目"
+      "ホームでの買い物や仲間との会話時に間違って選択することを防ぎたい思い。",
+      "",
+      "[JP]",
+      "以下の選択肢を「実は…」に引っ越します",
+      "* もう待機する必要はない",
+      "* 仲間に誘う",
+      "* この土地に移住して欲しい",
+      "* ホームで待機しろ",
+      "",
+      "[EN]",
+      "The following options are moved to 'Actually...'",
+      "* You can move now.",
+      "* Join me!",
+      "* Migrate to this land.",
+      "* Wait at your home.",
+      "",
+      "---",
+      "https://github.com/sk-0520/elin-mod-MovingActually"
     ],
     "tags": [
-      "General"
+      "General",
+      "QoL"
     ]
   },
   "mod": {
-    "version": "0.0.0",
+    "version": "1.0.0",
     "useDebugId": true,
     "log": "NUL"
   }
