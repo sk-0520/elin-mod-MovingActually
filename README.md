@@ -16,6 +16,7 @@
 | ここで待機して欲しい | Lang | General | disableMove |
 | 仲間に誘う | Lang | General | daJoinParty |
 | ホームで待機しろ (#1) | Lang | General | daLeaveParty |
+| この土地に移住して欲しい | Lang | General | daMakeHome |
 
 ## ~~共に暮らさないか~~
 

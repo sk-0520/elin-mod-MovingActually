@@ -47,6 +47,11 @@ namespace Elin.Plugin.Main.Models.Impl
             /// </summary>
             /// <remarks>Lang!General: daLeaveParty</remarks>
             public const string LeaveParty = "daLeaveParty";
+            /// <summary>
+            /// この土地に移住して欲しい
+            /// </summary>
+            /// <remarks>Lang!General: daMakeHome</remarks>
+            public const string MakeHome = "daMakeHome";
         }
 
         private static class JumpId
@@ -90,6 +95,16 @@ namespace Elin.Plugin.Main.Models.Impl
             /// </summary>
             /// <remarks>このID自体は Mod 内で使用を完結させ、表示用に Elin を経由することにはなるが最終的には <see cref="LeaveParty"/> を指すようにすること。</remarks>
             public const string HookLeaveParty = LeaveParty + "@" + Package.Id;
+
+            /// <summary>
+            /// この土地に移住して欲しい のジャンプID。
+            /// </summary>
+            public const string MakeHome = "_makeHome";
+            /// <summary>
+            /// <see cref="MakeHome"/> に対して差し込むMod用のジャンプID。
+            /// </summary>
+            /// <remarks>このID自体は Mod 内で使用を完結させ、表示用に Elin を経由することにはなるが最終的には <see cref="MakeHome"/> を指すようにすること。</remarks>
+            public const string HookMakeHome = MakeHome + "@" + Package.Id;
 
         }
 
@@ -144,6 +159,7 @@ namespace Elin.Plugin.Main.Models.Impl
             ;
             return result;
         }
+
         private static bool CanLeaveParty(Chara c)
         {
             // [ELIN:DramaCustomSequence.Build]
@@ -153,6 +169,19 @@ namespace Elin.Plugin.Main.Models.Impl
                 (c.IsPCParty && !c.isSummon)
                 &&
                 (c.host == null && c.homeZone != null)
+            ;
+            return result;
+        }
+
+        private static bool CanMakeHome(Chara c)
+        {
+            // [ELIN:DramaCustomSequence.Build]
+            // -> if (c.IsPCParty && !c.isSummon)
+            // -> -> if (EClass._zone.IsPCFaction && c.homeBranch != EClass._zone.branch)
+            var result =
+                (c.IsPCParty && !c.isSummon)
+                &&
+                (EClass._zone.IsPCFaction && c.homeBranch != EClass._zone.branch)
             ;
             return result;
         }
@@ -218,6 +247,21 @@ namespace Elin.Plugin.Main.Models.Impl
                 ModHelper.LogDev($"[ignore] {lang}, {idJump}");
                 return false;
             }
+
+            if (lang == LanguageId.MakeHome)
+            {
+                // フックした「この土地に移住して欲しい」が指定されている場合は Elin 側の正式なジャンプIDに差し替え
+                if (idJump == JumpId.HookMakeHome)
+                {
+                    idJump = JumpId.MakeHome;
+                    ModHelper.LogDev($"[hook] {nameof(idJump)}: {JumpId.HookMakeHome} -> {idJump}");
+                    return true;
+                }
+
+                ModHelper.LogDev($"[ignore] {lang}, {idJump}");
+                return false;
+            }
+
 
             // ホームで待機しろ、はすでに変換済みの言語が渡されるのでジャンプIDで判断する
             if (idJump == JumpId.LeaveParty)
@@ -293,10 +337,18 @@ namespace Elin.Plugin.Main.Models.Impl
                         ModHelper.LogDev("[add] LanguageId.JoinParty, JumpId.HookJoinParty");
                         instance.Choice2(LanguageId.JoinParty, JumpId.HookJoinParty);
                     }
-                    else if (CanLeaveParty(c)) // 特に Elin 側で分けてはい無さそうな気はするが一応 else で条件追加しておく
+                    else // 特に Elin 側で分けてはい無さそうな気はするが一応 else で条件追加しておく
                     {
-                        ModHelper.LogDev("[add] LanguageId.LeaveParty, JumpId.HookLeaveParty");
-                        instance.Choice2(LanguageId.LeaveParty.lang(c.homeZone.Name), JumpId.HookLeaveParty);
+                        if (CanMakeHome(c))
+                        {
+                            ModHelper.LogDev("[add] LanguageId.LeaveParty, JumpId.HookLeaveParty");
+                            instance.Choice2(LanguageId.MakeHome, JumpId.HookMakeHome);
+                        }
+                        if (CanLeaveParty(c))
+                        {
+                            ModHelper.LogDev("[add] LanguageId.LeaveParty, JumpId.HookLeaveParty");
+                            instance.Choice2(LanguageId.LeaveParty.lang(c.homeZone.Name), JumpId.HookLeaveParty);
+                        }
                     }
                 }
                 finally
