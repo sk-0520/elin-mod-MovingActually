@@ -1,5 +1,5 @@
 {
-  "$schema": "./dev-items/localization.schema.json",
+  "$schema": "./dev-items/Localization.schema.json",
   "general": {
   },
   "format": {
