@@ -33,6 +33,12 @@ namespace Elin.Plugin.Main.Models.Impl
             /// </summary>
             /// <remarks>Lang!General: daMakeHome</remarks>
             public const string MakeHome = "daMakeHome";
+
+            /// <summary>
+            /// ママー！
+            /// </summary>
+            /// <remarks>Lang!General: daMama</remarks>
+            public const string Mama = "daMama";
         }
 
         private static class JumpId
@@ -86,6 +92,16 @@ namespace Elin.Plugin.Main.Models.Impl
             /// </summary>
             /// <remarks>このID自体は Mod 内で使用を完結させ、表示用に Elin を経由することにはなるが最終的には <see cref="MakeHome"/> を指すようにすること。</remarks>
             public const string HookMakeHome = MakeHome + "@" + Package.Id;
+
+            /// <summary>
+            /// ママー！ のジャンプID。
+            /// </summary>
+            public const string Mama = "_mama";
+            /// <summary>
+            /// <see cref="Mama"/> に対して差し込むMod用のジャンプID。
+            /// </summary>
+            /// <remarks>このID自体は Mod 内で使用を完結させ、表示用に Elin を経由することにはなるが最終的には <see cref="Mama"/> を指すようにすること。</remarks>
+            public const string HookMama = Mama + "@" + Package.Id;
 
         }
 
