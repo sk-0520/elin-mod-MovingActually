@@ -1,4 +1,5 @@
 using Elin.Plugin.Generated;
+using Elin.Plugin.Main.Models.Settings;
 using Elin.Plugin.Main.PluginHelpers;
 using System.Collections.Generic;
 using System.Linq;
@@ -196,18 +197,18 @@ namespace Elin.Plugin.Main.Models.Impl
 
         #region DramaCustomSequence
 
-        internal static bool BuildPrefix(DramaCustomSequence instance, Chara c)
+        internal static bool BuildPrefix(DramaCustomSequence instance, Setting setting, Chara c)
         {
             BuildArgumentCharacter = c;
             return true;
         }
 
-        internal static void BuildPostfix(DramaCustomSequence instance, Chara c)
+        internal static void BuildPostfix(DramaCustomSequence instance, Setting setting, Chara c)
         {
             BuildArgumentCharacter = null;
         }
 
-        public static bool Choice2Prefix(DramaCustomSequence instance, string lang, ref string idJump)
+        public static bool Choice2Prefix(DramaCustomSequence instance, Setting setting, string lang, ref string idJump)
         {
             // 特定のセリフを選択肢に表示させないようにしたりジャンプ先加工したり、忙しい子
             ModHelper.LogDev($"Choice2Prefix: lang={lang}, idJump={idJump}");
@@ -242,7 +243,7 @@ namespace Elin.Plugin.Main.Models.Impl
             return true;
         }
 
-        public static bool ChoicePrefix(DramaCustomSequence instance, string lang, string idJump, bool cancel)
+        public static bool ChoicePrefix(DramaCustomSequence instance, Setting setting, string lang, string idJump, bool cancel)
         {
             var c = BuildArgumentCharacter;
             if (c == null)
@@ -307,7 +308,7 @@ namespace Elin.Plugin.Main.Models.Impl
             return true;
         }
 
-        public static void StepPostfix(DramaCustomSequence instance, string step)
+        public static void StepPostfix(DramaCustomSequence instance, Setting setting, string step)
         {
             CurrentOtherSequence = step == JumpId.FactionOther
                 ? OtherSequence.Start

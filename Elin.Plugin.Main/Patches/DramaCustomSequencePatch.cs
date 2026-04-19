@@ -1,4 +1,5 @@
 using Elin.Plugin.Main.Models.Impl;
+using Elin.Plugin.Main.Models.Settings;
 using HarmonyLib;
 
 namespace Elin.Plugin.Main.Patches
@@ -12,7 +13,7 @@ namespace Elin.Plugin.Main.Patches
         [HarmonyPrefix]
         public static bool BuildPrefix(DramaCustomSequence __instance, Chara c)
         {
-            return DramaCustomSequenceImpl.BuildPrefix(__instance, c);
+            return DramaCustomSequenceImpl.BuildPrefix(__instance, Setting.Instance, c);
         }
 
 
@@ -20,7 +21,7 @@ namespace Elin.Plugin.Main.Patches
         [HarmonyPostfix]
         public static void BuildPostfix(DramaCustomSequence __instance, Chara c)
         {
-            DramaCustomSequenceImpl.BuildPostfix(__instance, c);
+            DramaCustomSequenceImpl.BuildPostfix(__instance, Setting.Instance, c);
         }
 
 
@@ -28,21 +29,21 @@ namespace Elin.Plugin.Main.Patches
         [HarmonyPrefix]
         public static bool Choice2Prefix(DramaCustomSequence __instance, string lang, ref string idJump)
         {
-            return DramaCustomSequenceImpl.Choice2Prefix(__instance, lang, ref idJump);
+            return DramaCustomSequenceImpl.Choice2Prefix(__instance, Setting.Instance, lang, ref idJump);
         }
 
         [HarmonyPatch(nameof(DramaCustomSequence.Choice), new[] { typeof(string), typeof(string), typeof(bool) })]
         [HarmonyPrefix]
         public static bool ChoicePrefix(DramaCustomSequence __instance, string lang, string idJump, bool cancel)
         {
-            return DramaCustomSequenceImpl.ChoicePrefix(__instance, lang, idJump, cancel);
+            return DramaCustomSequenceImpl.ChoicePrefix(__instance, Setting.Instance, lang, idJump, cancel);
         }
 
         [HarmonyPatch(nameof(DramaCustomSequence.Step), new[] { typeof(string) })]
         [HarmonyPostfix]
         public static void StepPostfix(DramaCustomSequence __instance, string step)
         {
-            DramaCustomSequenceImpl.StepPostfix(__instance, step);
+            DramaCustomSequenceImpl.StepPostfix(__instance, Setting.Instance, step);
         }
 
         #endregion
