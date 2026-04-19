@@ -193,6 +193,25 @@ namespace Elin.Plugin.Main.Models.Impl
             return result;
         }
 
+        private static bool CanShowMama(Chara playerCharacter, Chara c)
+        {
+            if (playerCharacter.faith != EClass.game.religions.MoonShadow)
+            {
+                // ホロメ信仰していないのであれば「実は…」での表示判定自体関係ない
+                return false;
+            }
+
+            ConTransmuteHuman condition = playerCharacter.GetCondition<ConTransmuteHuman>();
+
+            if (condition != null)
+            {
+                // 赤ちゃんに擬人している場合はママ表示は「実は…」に入らないので非表示判定
+                return !condition.IsBaby;
+            }
+
+            return true;
+        }
+
         #endregion
 
         #region DramaCustomSequence
@@ -225,6 +244,36 @@ namespace Elin.Plugin.Main.Models.Impl
 
                 ModHelper.LogDev($"[ignore] {lang}, {idJump}");
                 return false;
+            }
+
+            // ホロメ信仰時のママー！をもみ消したり加工したり(設定が無効時はさわらない)
+            if (setting.MovingActuallyHoromeMommy && EClass.pc.faith == EClass.game.religions.MoonShadow)
+            {
+                if (lang == LanguageId.Mama)
+                {
+                    // 差し替え処理自体は LanguageHookJumpIdMap の処理と同じ
+                    if (idJump == JumpId.HookMama)
+                    {
+                        idJump = JumpId.Mama;
+                        ModHelper.LogDev($"[hook] {nameof(idJump)}: {JumpId.HookMama} -> {idJump}");
+                        return true;
+                    }
+
+                    // 「実は…」への移動判定が LanguageHookJumpIdMap 処理では対応できないのでここでやる
+                    // [ELIN:DramaCustomSequence.Build]
+                    // -> ConTransmuteHuman condition = EClass.pc.GetCondition<ConTransmuteHuman>();
+                    // -> if (condition == null)
+                    // -> -> if (EClass.pc.HasElement(1232) || EClass.pc.faith == EClass.game.religions.MoonShadow)
+                    // 1232 は知らん。FEAT.featBaby っぽいけど、そこに入る条件が分からんのでホロメ信仰前提で進める
+                    // 選択肢作成が行われているので condition 判定は不要だが、明示的に赤ちゃんに擬人している場合は選択肢を表示する
+                    // やってることよりコメントの方が長くなるなぁ。説明書いとかなきゃ後々わからんのでしゃあない
+                    ConTransmuteHuman condition = EClass.pc.GetCondition<ConTransmuteHuman>();
+                    if (!condition?.IsBaby ?? true)
+                    {
+                        ModHelper.LogDev($"[ignore] {lang}, {idJump}");
+                        return false;
+                    }
+                }
             }
 
             // ホームで待機しろ、はすでに変換済みの言語が渡されるのでジャンプIDで判断する
@@ -283,7 +332,7 @@ namespace Elin.Plugin.Main.Models.Impl
                         ModHelper.LogDev("[add] LanguageId.JoinParty, JumpId.HookJoinParty");
                         instance.Choice2(LanguageId.JoinParty, JumpId.HookJoinParty);
                     }
-                    else // 特に Elin 側で分けてはい無さそうな気はするが一応 else で条件追加しておく
+                    else // 特に Elin 側で分けてはいなさそうな気はするが一応 else で条件追加しておく
                     {
                         if (CanMakeHome(c))
                         {
@@ -297,6 +346,13 @@ namespace Elin.Plugin.Main.Models.Impl
                             ModHelper.LogDev("[add] LanguageId.LeaveParty, JumpId.HookLeaveParty");
                             instance.Choice2(LanguageId.LeaveParty.lang(c.homeZone.Name), JumpId.HookLeaveParty);
                         }
+                    }
+
+                    if (setting.MovingActuallyHoromeMommy && CanShowMama(EClass.pc, c))
+                    {
+                        // ママー！
+                        ModHelper.LogDev("[add] LanguageId.Mama, JumpId.HookMama");
+                        instance.Choice2(LanguageId.Mama, JumpId.HookMama);
                     }
                 }
                 finally
@@ -314,7 +370,7 @@ namespace Elin.Plugin.Main.Models.Impl
                 ? OtherSequence.Start
                 : OtherSequence.None
             ;
-            ModHelper.LogDev($"StepPostfix: step={step}, CurrentOtherSequence={CurrentOtherSequence}");
+            //ModHelper.LogDev($"StepPostfix: step={step}, CurrentOtherSequence={CurrentOtherSequence}");
         }
 
 
