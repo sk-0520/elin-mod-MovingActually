@@ -3,5 +3,11 @@
   "general": {
   },
   "format": {
+  },
+  "config": {
+    "Abc": {
+      "JP": "JP",
+      "EN": "EN"
+    }
   }
 }

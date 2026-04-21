@@ -399,6 +399,7 @@ namespace Elin.Plugin.Generator
                         """;
                     }
                 )}}
+                {{GeneratePluginLocalizationGroup(sourceBuilder, "PluginLocalizationConfig", define.Config)}}
 
                 internal class PluginLocalization: ILanguageSystem
                 {

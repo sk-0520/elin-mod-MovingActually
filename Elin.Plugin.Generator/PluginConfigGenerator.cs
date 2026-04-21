@@ -713,6 +713,15 @@ namespace Elin.Plugin.Generator
                     })
                 )}}
 
+                [{{sourceBuilder.ToCode<System.AttributeUsageAttribute>()}}({{sourceBuilder.ToCode(AttributeTargets.Property)}}, AllowMultiple = false)]
+                internal sealed class {{GeneratorConstants.GeneratePluginConfigDescriptionAttributeName}}: {{sourceBuilder.ToCode<System.Attribute>()}}
+                {
+                    public {{GeneratorConstants.GeneratePluginConfigDescriptionAttributeName}}({{sourceBuilder.ToCode<Type>()}} target, string descriptionName)
+                    {
+                        //NOP
+                    }
+                }
+
                 """;
 
                 initContext.AddSource($"Attributes.g.cs", sourceBuilder.Format(attributeSource));

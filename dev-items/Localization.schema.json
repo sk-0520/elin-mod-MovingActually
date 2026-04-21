@@ -5,7 +5,8 @@
   "additionalProperties": false,
   "required": [
     "general",
-    "format"
+    "format",
+    "config"
   ],
   "properties": {
     "$schema": {
@@ -114,6 +115,44 @@
                   }
                 }
               }
+            }
+          }
+        }
+      }
+    },
+    "config": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "設定項目の説明に使用される文字列",
+      "patternProperties": {
+        "^[A-Z][a-z0-9_][a-zA-Z0-9_]*$": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "key",
+          "required": [
+            "JP",
+            "EN"
+          ],
+          "properties": {
+            "JP": {
+              "type": "string",
+              "description": "日本語翻訳"
+            },
+            "EN": {
+              "type": "string",
+              "description": "英語翻訳"
+            },
+            "CN": {
+              "type": "string",
+              "description": "中国語翻訳"
+            },
+            "ZHTW": {
+              "type": "string",
+              "description": "繁体字中国語翻訳"
+            },
+            "KR": {
+              "type": "string",
+              "description": "韓国語翻訳"
             }
           }
         }
