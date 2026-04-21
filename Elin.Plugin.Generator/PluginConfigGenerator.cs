@@ -437,9 +437,9 @@ namespace Elin.Plugin.Generator
             if (args.Length == 2 && args[0].Value is INamedTypeSymbol targetType && args[1].Value is string descriptionName)
             {
                 var member = targetType.GetMembers().FirstOrDefault(m => m.Name == descriptionName);
-                if (member != null)
+                if (member is not null)
                 {
-                    return string.Empty;
+                    return args[0].Value + "." + args[1].Value;
                 }
             }
             return string.Empty;
