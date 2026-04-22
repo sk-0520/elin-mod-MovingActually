@@ -3,5 +3,11 @@
   "general": {
   },
   "format": {
+  },
+  "config": {
+    "MoveHoromeMommy": {
+      "JP": "ホロメ信仰時のママー！を「実は…」に引っ越すか。",
+      "EN": "Move Mommy! to 'Actually...' when believing in Holome."
+    }
   }
 }
