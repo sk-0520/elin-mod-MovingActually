@@ -434,15 +434,14 @@ namespace Elin.Plugin.Generator
         private static string GetDocumentCommentFromAttribute(AttributeData attribute)
         {
             var args = attribute.ConstructorArguments;
-            if (args.Length == 2 && args[0].Value is INamedTypeSymbol targetType && args[1].Value is string descriptionName)
-            {
-                var member = targetType.GetMembers().FirstOrDefault(m => m.Name == descriptionName);
-                if (member is not null)
-                {
-                    return args[0].Value + "." + args[1].Value;
-                }
-            }
-            return $"[{args}] {args.Length}" + string.Empty;
+
+            var langProperty = args.Length == 2 && (int)(args[1].Value!) == 1 /* PluginConfigDescriptionTarget.General */
+                ? "General"
+                : "Config"
+            ;
+            var targetProperty = (string)args[0].Value!;
+
+            return $"Elin.Plugin.Main.PluginHelpers.ModHelper.Lang.{langProperty}.{targetProperty}";
         }
 
         private IEnumerable<string> GenerateBindSources(SourceProductionContext context, Compilation compilation, SourceBuilder sourceBuilder, string parentSection, INamedTypeSymbol typeSymbol, IPropertySymbol? propertySymbol)
@@ -484,8 +483,8 @@ namespace Elin.Plugin.Generator
                                     {{sourceBuilder.ToStringLiteral(a.Name)}},
                                     defaultValue.{{a.Name}},
                                     new ConfigDescription(
-                                        {{sourceBuilder.ToStringLiteral(attr is null
-                                            ? string.Empty
+                                        {{(attr is null
+                                            ? "null"
                                             : GetDocumentCommentFromAttribute(attr)
                                         )}},
                                         {{acceptableValue ?? "null"}}
@@ -735,8 +734,8 @@ namespace Elin.Plugin.Generator
 
                 internal enum PluginConfigDescriptionTarget
                 {
-                    Config,
-                    General,
+                    Config = 0,
+                    General = 1,
                 }
 
                 [{{sourceBuilder.ToCode<System.AttributeUsageAttribute>()}}({{sourceBuilder.ToCode(AttributeTargets.Property)}}, AllowMultiple = false)]

@@ -21,6 +21,8 @@ namespace Elin.Plugin.Main.Models.Settings
         [GeneratePluginConfigDescription(nameof(PluginLocalizationConfig.Xyz), PluginConfigDescriptionTarget.Config)]
         public virtual bool Xyz { get; set; } = false;
 
+        public virtual bool None { get; set; } = false;
+
         #endregion
     }
 }
