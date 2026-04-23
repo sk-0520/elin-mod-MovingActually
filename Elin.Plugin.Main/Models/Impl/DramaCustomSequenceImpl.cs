@@ -297,7 +297,7 @@ namespace Elin.Plugin.Main.Models.Impl
             var c = BuildArgumentCharacter;
             if (c == null)
             {
-                ModHelper.LogNotExpected($"{nameof(BuildArgumentCharacter)} is null");
+                ModHelper.LogNotExpected($"{nameof(BuildArgumentCharacter)} is null. lang={lang}, idJump={idJump}, cancel={cancel}");
                 return true;
             }
 
