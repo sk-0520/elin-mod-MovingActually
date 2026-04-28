@@ -1,5 +1,4 @@
 using Elin.Plugin.Main.Models.Settings;
-using HarmonyLib;
 
 namespace Elin.Plugin.Main
 {
@@ -10,8 +9,7 @@ namespace Elin.Plugin.Main
         /// <summary>
         /// 起動時のプラグイン独自処理。
         /// </summary>
-        /// <param name="harmony"></param>
-        private void AwakePlugin(Harmony harmony)
+        private void AwakePlugin()
         {
             Setting.Instance = Setting.Bind(Config, new Setting());
         }
