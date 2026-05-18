@@ -1,5 +1,4 @@
 using Elin.Plugin.Generated;
-using Elin.Plugin.Main.Models.Settings;
 using Elin.Plugin.Main.PluginHelpers;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,12 +33,6 @@ namespace Elin.Plugin.Main.Models.Impl
             /// </summary>
             /// <remarks>Lang!General: daMakeHome</remarks>
             public const string MakeHome = "daMakeHome";
-
-            /// <summary>
-            /// ママー！
-            /// </summary>
-            /// <remarks>Lang!General: daMama</remarks>
-            public const string Mama = "daMama";
         }
 
         private static class JumpId
@@ -93,17 +86,6 @@ namespace Elin.Plugin.Main.Models.Impl
             /// </summary>
             /// <remarks>このID自体は Mod 内で使用を完結させ、表示用に Elin を経由することにはなるが最終的には <see cref="MakeHome"/> を指すようにすること。</remarks>
             public const string HookMakeHome = MakeHome + "@" + Package.Id;
-
-            /// <summary>
-            /// ママー！ のジャンプID。
-            /// </summary>
-            public const string Mama = "_mama";
-            /// <summary>
-            /// <see cref="Mama"/> に対して差し込むMod用のジャンプID。
-            /// </summary>
-            /// <remarks>このID自体は Mod 内で使用を完結させ、表示用に Elin を経由することにはなるが最終的には <see cref="Mama"/> を指すようにすること。</remarks>
-            public const string HookMama = Mama + "@" + Package.Id;
-
         }
 
         /// <summary>
@@ -216,18 +198,18 @@ namespace Elin.Plugin.Main.Models.Impl
 
         #region DramaCustomSequence
 
-        internal static bool BuildPrefix(DramaCustomSequence instance, Setting setting, Chara c)
+        internal static bool BuildPrefix(DramaCustomSequence instance, Chara c)
         {
             BuildArgumentCharacter = c;
             return true;
         }
 
-        internal static void BuildPostfix(DramaCustomSequence instance, Setting setting, Chara c)
+        internal static void BuildPostfix(DramaCustomSequence instance, Chara c)
         {
             BuildArgumentCharacter = null;
         }
 
-        public static bool Choice2Prefix(DramaCustomSequence instance, Setting setting, string lang, ref string idJump)
+        public static bool Choice2Prefix(DramaCustomSequence instance, string lang, ref string idJump)
         {
             // 特定のセリフを選択肢に表示させないようにしたりジャンプ先加工したり、忙しい子
             ModHelper.LogDev($"Choice2Prefix: lang={lang}, idJump={idJump}");
@@ -246,36 +228,6 @@ namespace Elin.Plugin.Main.Models.Impl
                 return false;
             }
 
-            // ホロメ信仰時のママー！をもみ消したり加工したり(設定が無効時はさわらない)
-            if (setting.MoveHoromeMommy && EClass.pc.faith == EClass.game.religions.MoonShadow)
-            {
-                if (lang == LanguageId.Mama)
-                {
-                    // 差し替え処理自体は LanguageHookJumpIdMap の処理と同じ
-                    if (idJump == JumpId.HookMama)
-                    {
-                        idJump = JumpId.Mama;
-                        ModHelper.LogDev($"[hook] {nameof(idJump)}: {JumpId.HookMama} -> {idJump}");
-                        return true;
-                    }
-
-                    // 「実は…」への移動判定が LanguageHookJumpIdMap 処理では対応できないのでここでやる
-                    // [ELIN:DramaCustomSequence.Build]
-                    // -> ConTransmuteHuman condition = EClass.pc.GetCondition<ConTransmuteHuman>();
-                    // -> if (condition == null)
-                    // -> -> if (EClass.pc.HasElement(1232) || EClass.pc.faith == EClass.game.religions.MoonShadow)
-                    // 1232 は知らん。FEAT.featBaby っぽいけど、そこに入る条件が分からんのでホロメ信仰前提で進める
-                    // 選択肢作成が行われているので condition 判定は不要だが、明示的に赤ちゃんに擬人している場合は選択肢を表示する
-                    // やってることよりコメントの方が長くなるなぁ。説明書いとかなきゃ後々わからんのでしゃあない
-                    ConTransmuteHuman condition = EClass.pc.GetCondition<ConTransmuteHuman>();
-                    if (!condition?.IsBaby ?? true)
-                    {
-                        ModHelper.LogDev($"[ignore] {lang}, {idJump}");
-                        return false;
-                    }
-                }
-            }
-
             // ホームで待機しろ、はすでに変換済みの言語が渡されるのでジャンプIDで判断する
             if (idJump == JumpId.LeaveParty)
             {
@@ -292,7 +244,7 @@ namespace Elin.Plugin.Main.Models.Impl
             return true;
         }
 
-        public static bool ChoicePrefix(DramaCustomSequence instance, Setting setting, string lang, string idJump, bool cancel)
+        public static bool ChoicePrefix(DramaCustomSequence instance, string lang, string idJump, bool cancel)
         {
             var c = BuildArgumentCharacter;
             if (c == null)
@@ -348,13 +300,6 @@ namespace Elin.Plugin.Main.Models.Impl
                             instance.Choice2(LanguageId.LeaveParty.lang(c.homeZone.Name), JumpId.HookLeaveParty);
                         }
                     }
-
-                    if (setting.MoveHoromeMommy && CanShowMama(EClass.pc, c))
-                    {
-                        // ママー！
-                        ModHelper.LogDev("[add] LanguageId.Mama, JumpId.HookMama");
-                        instance.Choice2(LanguageId.Mama, JumpId.HookMama);
-                    }
                 }
                 finally
                 {
@@ -365,7 +310,7 @@ namespace Elin.Plugin.Main.Models.Impl
             return true;
         }
 
-        public static void StepPostfix(DramaCustomSequence instance, Setting setting, string step)
+        public static void StepPostfix(DramaCustomSequence instance, string step)
         {
             CurrentOtherSequence = step == JumpId.FactionOther
                 ? OtherSequence.Start

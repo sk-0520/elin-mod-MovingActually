@@ -5,7 +5,7 @@
     "id": "sk.movingactually",
     "author": "sk",
     "loadPriority": 100,
-    "elinVersion": "0.23.295",
+    "elinVersion": "0.23.307",
     "description": [
       "ホームでの買い物や仲間との会話時に間違って選択することを防ぎたい思い。",
       "",
@@ -32,7 +32,7 @@
     ]
   },
   "mod": {
-    "version": "1.1.2",
+    "version": "1.2.0",
     "useDebugId": true,
     "log": "NUL"
   }
